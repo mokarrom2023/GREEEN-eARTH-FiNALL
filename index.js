@@ -7,7 +7,6 @@ const API = {
 };
 
 /**DOM Element Section */
-
 const elements = {
   categoryContainer: document.getElementById("category-container"),
   plantContainer: document.getElementById("plant-container"),
@@ -17,10 +16,10 @@ const elements = {
   totalPriceEl: document.getElementById("total-price"),
   plantModal: document.getElementById("plant_modal"),
   modalBody: document.getElementById("modal-body"),
-  donateForm: document.getElementById("donate-form"), // Donate form element add kora hoyeche
+  donateForm: document.getElementById("donate-form"),
 };
 
-let cart = []; //cart-er data rakhar array
+let cart = [];
 
 const setLoading = (isLoading) => elements.spinner.classList.toggle("hidden", !isLoading);
 
@@ -35,9 +34,7 @@ async function getJSON(url) {
   return res.json();
 }
 
-/**
- * ✅ Data Extractors
- */
+/** ✅ Data Extractors */
 function pickCategories(payload) {
   if (!payload) return [];
   return payload.data || payload.categories || [];
@@ -59,9 +56,7 @@ function getPlantId(p) {
   return p.id || p.plant_id || p._id || p.plantId || null;
 }
 
-/**
- * ✅ UI Helpers
- */
+/** ✅ UI Helpers */
 function setActiveCategory(activeId) {
   document.querySelectorAll(".cat-btn").forEach((btn) => {
     btn.classList.remove("bg-green-700", "text-white");
@@ -75,9 +70,7 @@ function setActiveCategory(activeId) {
   }
 }
 
-/**
- * ✅ Business Logic: Loading Data
- */
+/** ✅ Business Logic: Loading Data */
 async function loadCategories() {
   try {
     setLoading(true);
@@ -142,9 +135,7 @@ async function loadPlantsByCategory(categoryId) {
   }
 }
 
-/**
- * ✅ Rendering UI
- */
+/** ✅ Rendering UI */
 function renderPlants(plants) {
   elements.plantContainer.innerHTML = "";
   if (!plants || plants.length === 0) {
@@ -183,7 +174,7 @@ function renderPlants(plants) {
 }
 
 /**
- * ✅ Feature: Modal & Cart Alerts
+ * ✅ Modal Section: Tor Image-er moto shajano (Step-by-Step)
  */
 async function showPlantDetails(id, encodedData) {
   const fallback = JSON.parse(decodeURIComponent(encodedData));
@@ -192,16 +183,22 @@ async function showPlantDetails(id, encodedData) {
     const payload = await getJSON(API.details(id));
     const p = pickPlantDetail(payload) || fallback;
 
+    // Tor Image-er moto Layout: Name -> Image -> Information
     elements.modalBody.innerHTML = `
-      <img src="${p.image}" class="w-full h-56 object-cover rounded-xl mb-4">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-2xl font-bold text-[#166534]">${p.plant_name || p.name}</h2>
-        <span class="badge bg-green-100 text-[#166534] border-0">${p.category || ""}</span>
-      </div>
-      <p class="text-gray-600 text-sm leading-relaxed mb-4">${p.description || p.short_description}</p>
-      <div class="flex justify-between font-bold border-t pt-3">
-        <span>Price:</span>
-        <span class="text-green-700">৳${priceToNumber(p.price)}</span>
+      <div class="space-y-4">
+        <h2 class="text-2xl font-bold text-gray-900">${p.plant_name || p.name}</h2>
+        
+        <div class="w-full overflow-hidden rounded-xl">
+          <img src="${p.image}" class="w-full h-auto max-h-64 object-cover rounded-xl shadow-sm">
+        </div>
+
+        <div class="space-y-2 text-gray-700 text-sm">
+          <p><strong class="text-black">Category:</strong> ${p.category || "General"}</p>
+          <p><strong class="text-black">Price:</strong> ৳${priceToNumber(p.price)}</p>
+          <p class="leading-relaxed">
+            <strong class="text-black">Description:</strong> ${p.description || p.short_description || "No description provided."}
+          </p>
+        </div>
       </div>
     `;
     elements.plantModal.showModal();
@@ -212,7 +209,7 @@ async function showPlantDetails(id, encodedData) {
   }
 }
 
-// ✅ Add to Cart with Premium SweetAlert2
+/** ✅ Add to Cart Section */
 function addToCart(name, price) {
   cart.push({ name, price });
   updateCartUI();
@@ -223,7 +220,7 @@ function addToCart(name, price) {
   Swal.fire({
     title: `<span style="font-family: 'Poppins', sans-serif; color: #15803D;">${name}</span>`,
     html: `
-      <div style="text-align: center; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+      <div style="text-align: center; font-family: 'Segoe UI', sans-serif;">
         <p style="font-size: 1.2rem; margin: 10px 0;">৳${price} × 1 = ${price}৳</p>
         <p style="font-weight: bold; color: #333;">Total: ৳${currentTotal}</p>
         <hr style="border: 0.5px solid #eee; margin: 15px 0;">
@@ -234,9 +231,7 @@ function addToCart(name, price) {
     confirmButtonText: 'OKAY',
     confirmButtonColor: '#15803D',
     background: '#fff',
-    customClass: {
-      popup: 'rounded-3xl shadow-xl'
-    }
+    customClass: { popup: 'rounded-3xl shadow-xl' }
   });
 }
 
@@ -271,9 +266,7 @@ function updateCartUI() {
   elements.totalPriceEl.textContent = total;
 }
 
-/**
- * ✅ Donate Form: Premium SweetAlert2
- */
+/** ✅ Donate Form Section */
 if (elements.donateForm) {
   elements.donateForm.addEventListener("submit", (e) => {
     e.preventDefault();
